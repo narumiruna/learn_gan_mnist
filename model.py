@@ -41,10 +41,35 @@ def build_discriminator(input_):
         dense_1 = dense(flatten_1, 1024, activation=tf.nn.relu, name='dense_1')
         drop_3 = tf.nn.dropout(dense_1, keep_prob)
 
-        dense_2 = dense(drop_3, 1, activation=tf.nn.sigmoid, name='dense_2')
+        dense_2 = dense(drop_3, 1, name='dense_2')
         return dense_2
 
 g = build_generator(z)
 
 d_x = build_discriminator(x)
 d_z = build_discriminator(g)
+
+
+d_var = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='discriminator')
+g_var = tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='generator')
+
+
+loss_d = - d_x + d_z
+loss_g = - d_z
+
+
+d_minimizer = tf.train.RMSPropOptimizer(0.00005).minimize(loss_d, var_list=d_var)
+g_minimizer = tf.train.RMSPropOptimizer(0.00005).minimize(loss_g, var_list=g_var)
+
+
+mnist = input_data.read_data_sets('MNIST')
+
+print(mnist.train)
+with tf.Session() as sess:
+    sess.run(tf.global_variables_initializer())
+
+    for i in range(1000):
+
+        for j in range(10):
+            # sess.run(d_minimizer, feed_dict={x, z, keep_prob:0.5})
+            pass
