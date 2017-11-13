@@ -67,7 +67,8 @@ def train():
     c = 0.01
     clip = [v.assign(tf.clip_by_value(v, -c, c)) for v in d_vars]
 
-    data = Dataset(7)
+    mnist_7 = Dataset(7)
+
     n_steps = 5001
 
     os.makedirs('img', exist_ok=True)
@@ -76,7 +77,7 @@ def train():
         sess.run(tf.global_variables_initializer())
 
         for i in range(n_steps):
-            batch_x = np.reshape(data.next_batch(batch_size), [-1, 28, 28, 1])
+            batch_x = np.reshape(mnist_7.next_batch(batch_size), [-1, 28, 28, 1])
             batch_z = np.random.normal(size=[batch_size, 100])
 
             feed_dict = {x: batch_x, z: batch_z}
@@ -87,7 +88,7 @@ def train():
 
             if i % 1000 == 0:
                 img = sess.run(g_fake, feed_dict={z: np.random.normal(size=[1, 100])})
-                plt.imshow(np.reshape(img[0], [28, 28]))
+                plt.imshow(np.reshape(img[0], [28, 28]), cmap='gray')
                 plt.savefig('img/{}.jpg'.format(str(int(i / 1000)).zfill(3)))
 
 
