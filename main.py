@@ -81,9 +81,10 @@ def train():
             batch_z = np.random.normal(size=[batch_size, 100])
 
             feed_dict = {x: batch_x, z: batch_z}
-            for j in range(10):
-                sess.run([train_d, clip], feed_dict)
-
+            sess.run([train_d, clip], feed_dict)
+            
+            batch_z = np.random.normal(size=[batch_size, 100])
+            feed_dict = {z: batch_z}
             sess.run(train_g, feed_dict)
 
             if i % 1000 == 0:
