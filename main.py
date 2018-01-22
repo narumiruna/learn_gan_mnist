@@ -79,7 +79,6 @@ def train():
         for i in range(n_steps):
             batch_x = np.reshape(mnist_7.next_batch(batch_size), [-1, 28, 28, 1])
             batch_z = np.random.normal(size=[batch_size, 100])
-
             feed_dict = {x: batch_x, z: batch_z}
             sess.run([train_d, clip], feed_dict)
             
