@@ -4,9 +4,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
+from numpy.random import normal
 
 batch_size = 128
-
+lr = 5e-4
+c = 0.01
 
 class Dataset:
     def __init__(self, number):
@@ -60,11 +62,9 @@ def train():
     g_vars = tf.global_variables('generator')
     d_vars = tf.global_variables('discriminator')
 
-    learning_rate = 5e-4
-    train_g = tf.train.RMSPropOptimizer(learning_rate).minimize(loss_g, var_list=g_vars)
-    train_d = tf.train.RMSPropOptimizer(learning_rate).minimize(loss_d, var_list=d_vars)
+    train_g = tf.train.RMSPropOptimizer(lr).minimize(loss_g, var_list=g_vars)
+    train_d = tf.train.RMSPropOptimizer(lr).minimize(loss_d, var_list=d_vars)
 
-    c = 0.01
     clip = [v.assign(tf.clip_by_value(v, -c, c)) for v in d_vars]
 
     mnist_7 = Dataset(7)
@@ -77,18 +77,26 @@ def train():
         sess.run(tf.global_variables_initializer())
 
         for i in range(n_steps):
+            # train discriminator
             batch_x = np.reshape(mnist_7.next_batch(batch_size), [-1, 28, 28, 1])
-            batch_z = np.random.normal(size=[batch_size, 100])
+            batch_z = normal(size=[batch_size, 100])
             feed_dict = {x: batch_x, z: batch_z}
             sess.run([train_d, clip], feed_dict)
-            
-            batch_z = np.random.normal(size=[batch_size, 100])
+
+            # train generator
+            batch_z = normal(size=[batch_size, 100])
             feed_dict = {z: batch_z}
             sess.run(train_g, feed_dict)
 
             if i % 1000 == 0:
-                img = sess.run(g_fake, feed_dict={z: np.random.normal(size=[1, 100])})
-                plt.imshow(np.reshape(img[0], [28, 28]), cmap='gray')
+                images = sess.run(g_fake, feed_dict={z: normal(size=[64, 100])})
+
+                output = np.zeros(shape=[28 * 8, 28 * 8], dtype=float)
+                for j, image in enumerate(images):
+                    output[(j // 8) * 28:(j // 8 + 1) * 28, (j % 8) *
+                           28:(j % 8 + 1) * 28] = np.reshape(image, [28, 28])
+
+                plt.imshow(output, cmap='gray')
                 plt.savefig('img/{}.jpg'.format(str(int(i / 1000)).zfill(3)))
 
 
